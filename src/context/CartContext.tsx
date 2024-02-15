@@ -1,11 +1,5 @@
 /* eslint-disable no-fallthrough */
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { sumProducts } from "../helper/helper";
 import { CartSelectedItem, CartStateType } from "../types/ProductType";
 
@@ -77,6 +71,8 @@ const reducer: any = (
         total: 0,
         checkout: true,
       };
+    case "HYDRATE_STATE":
+      return action.payload;
     default:
       throw new Error("Invalid action");
   }
@@ -98,6 +94,18 @@ function CartProvider({ children }: Props) {
 
 const useCart = () => {
   const { state, dispatch } = useContext(CartContext);
+
+  useEffect(() => {
+    const storedState = localStorage.getItem("cart");
+    if (storedState) {
+      dispatch({ type: "HYDRATE_STATE", payload: JSON.parse(storedState) });
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(state));
+  }, [state]);
+
   return [state, dispatch];
 };
 
